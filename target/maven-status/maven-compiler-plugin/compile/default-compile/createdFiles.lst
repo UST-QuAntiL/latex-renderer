@@ -1,0 +1,4 @@
+com\renderLatex\service\RenderService.class
+com\renderLatex\RenderLatex.class
+com\renderLatex\entities\LatexContent.class
+com\renderLatex\rest\RenderLatexController.class

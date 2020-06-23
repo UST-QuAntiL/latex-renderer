@@ -135,6 +135,32 @@ public class RenderLatexController {
         }
 
         return new ResponseEntity<>(renderedFile, headers, HttpStatus.OK);
-//        return pdf;
+    }
+
+
+    @PostMapping(
+            value = "/renderQasmAsPdf",
+            produces = MediaType.APPLICATION_PDF_VALUE
+    )
+    public @ResponseBody
+    byte[] renderQasmAsPdf(@RequestBody String qasmFile) throws IOException {
+        this.renderService.renderQasmAsPdf(qasmFile);
+
+        Path pdfPath = Paths.get("qasm.pdf");
+        byte[] pdf = Files.readAllBytes(pdfPath);
+        return pdf;
+    }
+
+    @PostMapping(
+            value = "/renderQasmAsSvg",
+            produces = "image/svg+xml"
+    )
+    public @ResponseBody
+    byte[] renderQasmAsSvg(@RequestBody String qasmFile) throws IOException {
+        this.renderService.renderQasmAsSvg(qasmFile);
+
+        Path svgPath = Paths.get("content1.svg");
+        byte[] svg = Files.readAllBytes(svgPath);
+        return svg;
     }
 }

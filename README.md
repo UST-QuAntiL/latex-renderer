@@ -1,10 +1,10 @@
-#Latex-Renderer
+# Latex-Renderer
 Service for rendering latex content such as algorithms, diagrams, pictures etc. Latex-Render accepts the document body, the packages that are required to render the document and offers svg, png and pdf as output formats.
 
-###Version:
+### Version:
 The latest version is: **0.1**
 
-###Requirements:
+### Requirements:
 Runs on: Windows
 Port: 8081
 
@@ -15,14 +15,14 @@ Port: 8081
 	* The directory containing gswin32c.exe shall be added to PATH.
 	* ImageMagick (including legacy scripts) - rename convert.exe to imgconvert.exe 
 
-###Installation:
+### Installation:
   1. Download Latex-Renderer
   2. Make sure all required programms are installed.
   3. 1st time Setup: mvn package -DskipTests 
   4. To start Latex-Renderer run: mvn spring-boot:run
 
 
-###API:
+### API:
 http://localhost:8081/renderLatex  expects (String content, List<String> latexPackages, String output) as JSON
 
 Export formats are: pdf, png, fullPdf, svg, svgz
@@ -33,6 +33,6 @@ Example:
 
 
 
-
+### TODO:
 Upcoming versions shall include:
 unix compatiblity, easier setup, shipment as container

@@ -150,7 +150,7 @@ public class RenderService {
         }
     }
 
-    public boolean convertToQasmTex(){
+    public void convertToQasmTex(){
         try {
             ProcessBuilder processBuilderRenderTex = new ProcessBuilder();
             processBuilderRenderTex.command("cmd.exe", "/c", "python qasm2tex.py test.qasm");

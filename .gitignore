@@ -31,5 +31,6 @@ target/
 *.aux
 *.svg
 *.svgz
-*.iml
 *.gz
+*.qasm
+*.idx

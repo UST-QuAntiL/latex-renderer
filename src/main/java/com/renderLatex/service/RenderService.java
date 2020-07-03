@@ -43,6 +43,7 @@ public class RenderService {
         latexContent.getLatexPackages().forEach(item -> this.packages += (item + " \n "));
         createTexDoc();
         renderTex("renderFile.tex");
+        convertToPng("renderFile.pdf");
     }
 
     public void createTexDoc(){
@@ -80,7 +81,12 @@ public class RenderService {
     public void renderTex(String filename){
         try {
             ProcessBuilder processBuilderRenderTex = new ProcessBuilder();
-            processBuilderRenderTex.command("cmd.exe", "/c", "pdflatex -shell-escape " + filename);
+            if(System.getProperty("os.name").startsWith("Windows")){
+                processBuilderRenderTex.command("cmd.exe", "/c", "pdflatex -shell-escape " + filename);
+            } else {
+                processBuilderRenderTex.command("/bin/bash", "-c", "pdflatex -shell-escape " + filename);
+            }
+
             Process processTex = processBuilderRenderTex.start();
 
             StringBuilder output = new StringBuilder();
@@ -112,10 +118,19 @@ public class RenderService {
 
             ProcessBuilder processBuilderRenderSvg = new ProcessBuilder();
 //            processBuilderRenderSvg.command("cmd.exe", "/c", "inkscape --without-gui --file=renderFile.pdf --export-plain-svg=renderFile.svg"); works but svg not pretty
-            if(zipped){
-                processBuilderRenderSvg.command("cmd.exe", "/c", "pdf2svg2.bat \"" + userDirectory + "\\" + filename + "\" \"" + userDirectory +"\" -z");
-            }else{
-                processBuilderRenderSvg.command("cmd.exe", "/c", "pdf2svg2.bat \"" + userDirectory + "\\" + filename + "\" \"" + userDirectory +"\"");
+
+            if(System.getProperty("os.name").startsWith("Windows")) {
+                if (zipped) {
+                    processBuilderRenderSvg.command("cmd.exe", "/c", "pdf2svg2.bat \"" + userDirectory + "\\" + filename + "\" \"" + userDirectory + "\" -z");
+                } else {
+                    processBuilderRenderSvg.command("cmd.exe", "/c", "pdf2svg2.bat \"" + userDirectory + "\\" + filename + "\" \"" + userDirectory + "\"");
+                }
+            } else {
+                if (zipped) {
+                    processBuilderRenderSvg.command("/bin/bash", "-c",  "pdf2svg "+ filename + " " + "content1.svg -z" );
+                } else {
+                    processBuilderRenderSvg.command("/bin/bash", "-c",  "pdf2svg "+ filename + " " + "content1.svg");
+                }
             }
             Process processSvg = processBuilderRenderSvg.start();
 
@@ -152,22 +167,27 @@ public class RenderService {
 
     public void convertToQasmTex(){
         try {
-            ProcessBuilder processBuilderRenderTex = new ProcessBuilder();
-            processBuilderRenderTex.command("cmd.exe", "/c", "python qasm2tex.py test.qasm");
-            Process processTex = processBuilderRenderTex.start();
+            ProcessBuilder processBuilderRender = new ProcessBuilder();
+            if(System.getProperty("os.name").startsWith("Windows")) {
+                processBuilderRender.command("cmd.exe", "/c", "python qasm2tex.py test.qasm");
+            } else {
+                //TODO: python dependencies in Docker
+                processBuilderRender.command("/bin/bash", "-c", "python qasm2tex.py test.qasm");
+            }
+            Process process = processBuilderRender.start();
 
             StringBuilder output = new StringBuilder();
 
-            BufferedReader readerTex = new BufferedReader(
-                    new InputStreamReader(processTex.getInputStream()));
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()));
 
             String line;
-            while ((line = readerTex.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 output.append(line + "\n");
             }
 
-            int exitValTex = processTex.waitFor();
-            if (exitValTex == 0) {
+            int exitVal = process.waitFor();
+            if (exitVal == 0) {
                 System.out.println("Successfully rendered Tex");
                 try ( FileWriter fileWriter = new FileWriter("qasm.tex")) {
                     fileWriter.write(String.valueOf(output));
@@ -179,6 +199,38 @@ public class RenderService {
                 System.out.println(output);
             } else {
                 System.out.println("Qasm could not be rendered");
+            }
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            e.printStackTrace();
+        }
+    }
+
+    public void convertToPng(String filename){
+        try {
+            ProcessBuilder processBuilderRender = new ProcessBuilder();
+
+            if(System.getProperty("os.name").startsWith("Windows")) {
+                //should be done via imagemagick integration
+            } else {
+                processBuilderRender.command("/bin/bash", "-c",  "pdftoppm -png "+ filename + " > renderFile.png");
+            }
+            Process process = processBuilderRender.start();
+
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()));
+
+            StringBuilder output = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line + "\n");
+            }
+            int exitVal = process.waitFor();
+            if (exitVal == 0) {
+                System.out.println("Successfully rendered PNG");
+                System.out.println(output);
+            } else {
+                System.out.println("PNG could not be rendered");
             }
         } catch (Exception e) {
             System.out.println(e.toString());

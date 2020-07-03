@@ -163,4 +163,9 @@ public class RenderLatexController {
         byte[] svg = Files.readAllBytes(svgPath);
         return svg;
     }
+
+    @RequestMapping("/")
+    public String home() {
+        return "Hello Docker World";
+    }
 }

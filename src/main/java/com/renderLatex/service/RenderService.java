@@ -41,13 +41,9 @@ public class RenderService {
         this.content = latexContent.getContent();
         this.packages = "";
         latexContent.getLatexPackages().forEach(item -> this.packages += (item + " \n "));
-        System.out.println(this.content);
         createTexDoc();
-        System.out.println("Doc created");
         renderTex("renderFile.tex");
-        System.out.println("Tex rendered");
         convertToPng("renderFile.pdf");
-        System.out.println("File converted");
     }
 
     public void createTexDoc(){
@@ -100,7 +96,6 @@ public class RenderService {
 
             String line;
             while ((line = readerTex.readLine()) != null) {
-                System.out.println(line);
                 output.append(line + "\n");
             }
 

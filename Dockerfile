@@ -8,6 +8,19 @@ RUN apt-get update
 RUN apt-get install miktex -y
 RUN miktexsetup finish
 RUN initexmf --set-config-value [MPM]AutoInstall=1
+RUN apt-get update
+#miktex admin & package setup
+# update file name database
+RUN initexmf --update-fndb --admin
+# build the font maps
+RUN initexmf --mkmaps --admin
+# create all possible links
+RUN initexmf --mklinks --force --admin
+# Check the package repository for updates, then print the list of updateable packages.
+RUN mpm --find-updates --admin
+# Update all installed packages.
+RUN mpm --update --admin
+
 RUN apt-get install pdf2svg -y &&\
         apt-get install poppler-utils -y && \
         apt-get install libcairo2-dev -y && \
@@ -29,6 +42,7 @@ RUN apt-get update && \
 	update-ca-certificates -f && \
 	rm -rf /var/lib/apt/lists/* && \
 	rm -rf /var/cache/oracle-jdk8-installer;
+
 
 # Setup JAVA_HOME, this is useful for docker commandline
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/

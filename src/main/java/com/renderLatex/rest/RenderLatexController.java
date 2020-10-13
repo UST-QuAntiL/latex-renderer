@@ -3,6 +3,9 @@ package com.renderLatex.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.renderLatex.entities.LatexContent;
 import com.renderLatex.service.RenderService;
+import com.renderLatex.annotation.ApiVersion;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,8 @@ import java.nio.file.Paths;
 
 
 @RestController
+@CrossOrigin(allowedHeaders = "*", origins = "*")
+@ApiVersion("v1")
 public class RenderLatexController {
 
     private ObjectMapper objectMapper;
@@ -29,6 +34,10 @@ public class RenderLatexController {
         this.renderService = renderService;
     }
 
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render latex source code as png")
     @PostMapping(
             value = "/renderLatexAsPng",
             produces = MediaType.IMAGE_PNG_VALUE
@@ -42,6 +51,10 @@ public class RenderLatexController {
         return png;
     }
 
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render latex source code as svg")
     @PostMapping(
             value = "/renderLatexAsSvg",
             produces = "image/svg+xml"
@@ -55,6 +68,10 @@ public class RenderLatexController {
         return svg;
     }
 
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render latex source code as zipped svg")
     @PostMapping(
             value = "/renderLatexAsSvgz",
             produces = "image/svg+xml"
@@ -68,6 +85,10 @@ public class RenderLatexController {
         return svg;
     }
 
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render latex source code as pdf")
     @PostMapping(
             value = "/renderLatexAsPdf",
             produces = MediaType.APPLICATION_PDF_VALUE
@@ -81,6 +102,10 @@ public class RenderLatexController {
         return pdf;
     }
 
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render latex source code as full pdf")
     @PostMapping(
             value = "/renderLatexAsFullPdf",
             produces = MediaType.APPLICATION_PDF_VALUE
@@ -94,6 +119,10 @@ public class RenderLatexController {
         return pdf;
     }
 
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render latex source code as format given in the request body")
     @PostMapping(
             value = "/renderLatex"
 
@@ -138,6 +167,10 @@ public class RenderLatexController {
     }
 
 
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render qasm source code as pdf")
     @PostMapping(
             value = "/renderQasmAsPdf",
             produces = MediaType.APPLICATION_PDF_VALUE
@@ -151,6 +184,10 @@ public class RenderLatexController {
         return pdf;
     }
 
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render qasm source code as svg")
     @PostMapping(
             value = "/renderQasmAsSvg",
             produces = "image/svg+xml"

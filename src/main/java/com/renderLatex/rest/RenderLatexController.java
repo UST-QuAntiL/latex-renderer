@@ -36,8 +36,8 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
-    }, description = "")
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render latex source code as png")
     @PostMapping(
             value = "/renderLatexAsPng",
             produces = MediaType.IMAGE_PNG_VALUE
@@ -53,8 +53,8 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
-    }, description = "")
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render latex source code as svg")
     @PostMapping(
             value = "/renderLatexAsSvg",
             produces = "image/svg+xml"
@@ -70,8 +70,8 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
-    }, description = "")
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render latex source code as zipped svg")
     @PostMapping(
             value = "/renderLatexAsSvgz",
             produces = "image/svg+xml"
@@ -87,8 +87,8 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
-    }, description = "")
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render latex source code as pdf")
     @PostMapping(
             value = "/renderLatexAsPdf",
             produces = MediaType.APPLICATION_PDF_VALUE
@@ -104,8 +104,8 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
-    }, description = "")
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render latex source code as full pdf")
     @PostMapping(
             value = "/renderLatexAsFullPdf",
             produces = MediaType.APPLICATION_PDF_VALUE
@@ -121,8 +121,8 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
-    }, description = "")
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render latex source code as format given in the request body")
     @PostMapping(
             value = "/renderLatex"
 
@@ -169,8 +169,8 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
-    }, description = "")
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render qasm source code as pdf")
     @PostMapping(
             value = "/renderQasmAsPdf",
             produces = MediaType.APPLICATION_PDF_VALUE
@@ -186,8 +186,8 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
-    }, description = "")
+            @ApiResponse(responseCode = "500"),
+    }, description = "Render qasm source code as svg")
     @PostMapping(
             value = "/renderQasmAsSvg",
             produces = "image/svg+xml"

@@ -36,7 +36,7 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", description = "Request body has invalid fields"),
+            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
     }, description = "")
     @PostMapping(
             value = "/renderLatexAsPng",
@@ -53,7 +53,7 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", description = "Request body has invalid fields"),
+            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
     }, description = "")
     @PostMapping(
             value = "/renderLatexAsSvg",
@@ -70,7 +70,7 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", description = "Request body has invalid fields"),
+            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
     }, description = "")
     @PostMapping(
             value = "/renderLatexAsSvgz",
@@ -87,7 +87,7 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", description = "Request body has invalid fields"),
+            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
     }, description = "")
     @PostMapping(
             value = "/renderLatexAsPdf",
@@ -104,7 +104,7 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", description = "Request body has invalid fields"),
+            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
     }, description = "")
     @PostMapping(
             value = "/renderLatexAsFullPdf",
@@ -121,7 +121,7 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", description = "Request body has invalid fields"),
+            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
     }, description = "")
     @PostMapping(
             value = "/renderLatex"
@@ -169,7 +169,7 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", description = "Request body has invalid fields"),
+            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
     }, description = "")
     @PostMapping(
             value = "/renderQasmAsPdf",
@@ -186,7 +186,7 @@ public class RenderLatexController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400", description = "Request body has invalid fields"),
+            @ApiResponse(responseCode = "500", description = "Request body has invalid fields"),
     }, description = "")
     @PostMapping(
             value = "/renderQasmAsSvg",

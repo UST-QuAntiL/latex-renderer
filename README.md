@@ -1,4 +1,4 @@
-# Latex-Renderer
+# LaTex-Renderer
 Service for rendering latex content such as algorithms, diagrams, pictures etc. Latex-Render accepts the document body, the packages that are required to render the document and offers svg, png and pdf as output formats.
 
 ### Version:

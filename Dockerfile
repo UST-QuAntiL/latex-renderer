@@ -1,3 +1,9 @@
+FROM maven:3-jdk-8 as builder
+
+COPY . /tmp/latex-renderer
+WORKDIR /tmp/latex-renderer
+RUN mvn package -DskipTests
+
 FROM ubuntu:18.04
 RUN apt-get update
 RUN apt-get install gnupg -y
@@ -48,6 +54,8 @@ RUN apt-get update && \
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
 RUN export JAVA_HOME
 
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
+
+
+
+COPY --from=builder /tmp/latex-renderer/target/api-0.0.1-SNAPSHOT.jar app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]

@@ -7,7 +7,7 @@ The latest version is: **0.1**
 
 ### Installation:
   * As a **Docker Container** (recommended)
-	1. Pull and Run image via: *docker run --rm -p 8082:8082 beiselmn/latex-renderer:0.1*
+	1. Pull and Run image via: *docker run --rm -p 8082:8082 planqk/latex-renderer:latest
 
   * As a **Spring-Boot** project:
 

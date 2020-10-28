@@ -37,9 +37,16 @@ Export formats are:
   * svgz: returns a zipped SVG that contains the cutout of the rendered content.
 
 Example:  
-{"content":"\\\begin{quantikz}\\n\t\\\lstick{$\\\ket{0}$} & \\\gate{H} & \\\ctrl{1} & \\\gate{H} & \\\ctrl{1} & \\\swap{2} & \\\ctrl{1} & \\\qw \\\\\\\ \n \t \\\lstick{$\\\ket{0}$} & \\\gate{D} & \\\targ{} & \\\octrl{-1} & \\\control{} & \\\qw & \\\octrl{1} & \\\qw \\\\\\\\ \n \t &&&&& \\\targX{} & \\\gate{F} & \\\qw \n \\\end{quantikz}",  
+``\begin{quantikz}
+\lstick{\ket{0}} & \phase{\alpha} & \gate{H}
+& \phase{\beta} & \gate{H} & \phase{\gamma}
+& \rstick{Arbitrary\\pure state}\qw
+\end{quantikz}``
+
+is included in the REST call via
+``{"content":"\\\begin{quantikz}\\n\t\\\lstick{$\\\ket{0}$} & \\\gate{H} & \\\ctrl{1} & \\\gate{H} & \\\ctrl{1} & \\\swap{2} & \\\ctrl{1} & \\\qw \\\\\\\ \n \t \\\lstick{$\\\ket{0}$} & \\\gate{D} & \\\targ{} & \\\octrl{-1} & \\\control{} & \\\qw & \\\octrl{1} & \\\qw \\\\\\\\ \n \t &&&&& \\\targX{} & \\\gate{F} & \\\qw \n \\\end{quantikz}",  
 "latexPackages":["\\\usepackage{tikz}","\\\usetikzlibrary{quantikz}"],  
-"output":"svg"}
+"output":"svg"}``
 
 ### Userguide:
   * It is recommended to use this service for automated latex rendering. 

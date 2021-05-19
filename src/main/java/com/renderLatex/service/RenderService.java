@@ -82,9 +82,9 @@ public class RenderService {
         try {
             ProcessBuilder processBuilderRenderTex = new ProcessBuilder();
             if(System.getProperty("os.name").startsWith("Windows")){
-                processBuilderRenderTex.command("cmd.exe", "/c", "pdflatex -shell-escape " + filename);
+                processBuilderRenderTex.command("cmd.exe", "/c", "pdflatex -halt-on-error -shell-escape " + filename);
             } else {
-                processBuilderRenderTex.command("/bin/bash", "-c", "pdflatex -shell-escape " + filename);
+                processBuilderRenderTex.command("/bin/bash", "-c", "pdflatex -halt-on-error -shell-escape " + filename);
             }
 
             Process processTex = processBuilderRenderTex.start();

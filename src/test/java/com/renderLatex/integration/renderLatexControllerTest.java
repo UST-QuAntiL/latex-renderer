@@ -86,19 +86,6 @@ public class renderLatexControllerTest {
                 .andReturn();
     }
 
-    @Test
-    public void renderLatexAsSvgzSucceeds() throws Exception {
-        LatexContent latexContent = this.integrationTestHelper.getDefaultLatexContent();
-        System.out.print(this.objectMapper.writeValueAsString(latexContent));
-        System.out.println(this.objectMapper);
-        MvcResult postResult = this.mockMvc.perform(post("/renderLatexAsSvgz")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(this.objectMapper.writeValueAsString(latexContent)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.valueOf("image/svg+xml")))
-                .andReturn();
-    }
-
 }
 
 

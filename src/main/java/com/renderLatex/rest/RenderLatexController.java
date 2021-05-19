@@ -1,9 +1,10 @@
 package com.renderLatex.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.renderLatex.entities.LatexContent;
 import com.renderLatex.service.RenderService;
 import com.renderLatex.annotation.ApiVersion;
+import com.renderLatex.utils.Utils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,17 +21,19 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 
+
 @RestController
 @CrossOrigin(allowedHeaders = "*", origins = "*")
 @ApiVersion("v1")
 public class RenderLatexController {
 
-    private ObjectMapper objectMapper;
+    // TODO: GET API FOR CACHING, enable headercaching for unlimited time
+    // TODO: Include Tests in MavenRun, Clean up pom.xml, Cleanup on crash
+
     private RenderService renderService;
 
     @Autowired
-    public RenderLatexController(ObjectMapper objectMapper, RenderService renderService) {
-        this.objectMapper = objectMapper;
+    public RenderLatexController(RenderService renderService) {
         this.renderService = renderService;
     }
 
@@ -44,10 +47,10 @@ public class RenderLatexController {
     )
     public @ResponseBody
     byte[] renderLatexAsPng(@RequestBody LatexContent latexContent) throws IOException {
-        this.renderService.renderAsPng(latexContent);
-
-        Path pngPath = Paths.get("renderFile.png");
+        String filepath = this.renderService.renderAsPng(latexContent);
+        Path pngPath = Paths.get(filepath);
         byte[] png = Files.readAllBytes(pngPath);
+        Utils.removeDirectory(filepath);
         return png;
     }
 
@@ -61,27 +64,10 @@ public class RenderLatexController {
     )
     public @ResponseBody
     byte[] renderLatexAsSvg(@RequestBody LatexContent latexContent) throws IOException {
-        this.renderService.renderAsSvg(latexContent, false);
-
-        Path svgPath = Paths.get("content1.svg");
+        String filepath = this.renderService.renderAsSvg(latexContent);
+        Path svgPath = Paths.get(filepath);
         byte[] svg = Files.readAllBytes(svgPath);
-        return svg;
-    }
-
-    @Operation(responses = {
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "500"),
-    }, description = "Render latex source code as zipped svg")
-    @PostMapping(
-            value = "/renderLatexAsSvgz",
-            produces = "image/svg+xml"
-    )
-    public @ResponseBody
-    byte[] renderLatexAsSvgz(@RequestBody LatexContent latexContent) throws IOException {
-        this.renderService.renderAsSvg(latexContent, true);
-
-        Path svgPath = Paths.get("content1.svgz");
-        byte[] svg = Files.readAllBytes(svgPath);
+        Utils.removeDirectory(filepath);
         return svg;
     }
 
@@ -95,10 +81,10 @@ public class RenderLatexController {
     )
     public @ResponseBody
     byte[] renderLatexAsPdf(@RequestBody LatexContent latexContent) throws IOException {
-        this.renderService.renderAsPdf(latexContent);
-
-        Path pdfPath = Paths.get("renderFile.pdf");
+        String filepath =this.renderService.renderAsPdf(latexContent);
+        Path pdfPath = Paths.get(filepath);
         byte[] pdf = Files.readAllBytes(pdfPath);
+        Utils.removeDirectory(filepath);
         return pdf;
     }
 
@@ -112,10 +98,10 @@ public class RenderLatexController {
     )
     public @ResponseBody
     byte[] renderLatexAsFullPdf(@RequestBody LatexContent latexContent) throws IOException {
-        this.renderService.renderAsFullPdf(latexContent);
-
-        Path pdfPath = Paths.get("renderFile.pdf");
+        String filepath = this.renderService.renderAsFullPdf(latexContent);
+        Path pdfPath = Paths.get(filepath);
         byte[] pdf = Files.readAllBytes(pdfPath);
+        Utils.removeDirectory(filepath);
         return pdf;
     }
 
@@ -125,84 +111,49 @@ public class RenderLatexController {
     }, description = "Render latex source code as format given in the request body")
     @PostMapping(
             value = "/renderLatex"
-
     )
     public ResponseEntity<byte[]> renderLatex(@RequestBody LatexContent latexContent) throws IOException {
         byte[] renderedFile = null;
+        String filepath ="";
         HttpHeaders headers = new HttpHeaders();
         switch (latexContent.getOutput()){
             case "pdf":
-                this.renderService.renderAsPdf(latexContent);
-                Path pdfPath = Paths.get("renderFile.pdf");
+                filepath = this.renderService.renderAsPdf(latexContent);
+                Path pdfPath = Paths.get(filepath);
                 renderedFile = Files.readAllBytes(pdfPath);
                 headers.setContentType(MediaType.APPLICATION_PDF);
                 break;
             case "png":
-                this.renderService.renderAsPng(latexContent);
-                Path pngPath = Paths.get("renderFile.png");
+                filepath = this.renderService.renderAsPng(latexContent);
+                Path pngPath = Paths.get(filepath);
                 renderedFile = Files.readAllBytes(pngPath);
                 headers.setContentType(MediaType.IMAGE_PNG);
                 break;
+            case "jpg":
+                filepath = this.renderService.renderAsJpg(latexContent);
+                Path jpgPath = Paths.get(filepath);
+                renderedFile = Files.readAllBytes(jpgPath);
+                headers.setContentType(MediaType.IMAGE_JPEG);
+                break;
             case "fullPdf":
-                this.renderService.renderAsFullPdf(latexContent);
-                Path fullPdfPath = Paths.get("renderFile.pdf");
+                filepath = this.renderService.renderAsFullPdf(latexContent);
+                Path fullPdfPath = Paths.get(filepath);
                 renderedFile = Files.readAllBytes(fullPdfPath);
                 headers.setContentType(MediaType.APPLICATION_PDF);
                 break;
             case "svg":
-                this.renderService.renderAsSvg(latexContent, false);
-                Path svgPath = Paths.get("content1.svg");
+                filepath = this.renderService.renderAsSvg(latexContent);
+                Path svgPath = Paths.get(filepath);
                 renderedFile = Files.readAllBytes(svgPath);
                 headers.setContentType(MediaType.valueOf("image/svg+xml"));
                 break;
-            case "svgz":
-                this.renderService.renderAsSvg(latexContent, true);
-                Path svgzPath = Paths.get("content1.svgz");
-                renderedFile = Files.readAllBytes(svgzPath);
-                headers.setContentType(MediaType.valueOf("image/svg+xml"));
-                break;
         }
-
+        Utils.removeDirectory(filepath);
         return new ResponseEntity<>(renderedFile, headers, HttpStatus.OK);
-    }
-
-
-    @Operation(responses = {
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "500"),
-    }, description = "Render qasm source code as pdf")
-    @PostMapping(
-            value = "/renderQasmAsPdf",
-            produces = MediaType.APPLICATION_PDF_VALUE
-    )
-    public @ResponseBody
-    byte[] renderQasmAsPdf(@RequestBody String qasmFile) throws IOException {
-        this.renderService.renderQasmAsPdf(qasmFile);
-
-        Path pdfPath = Paths.get("qasm.pdf");
-        byte[] pdf = Files.readAllBytes(pdfPath);
-        return pdf;
-    }
-
-    @Operation(responses = {
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "500"),
-    }, description = "Render qasm source code as svg")
-    @PostMapping(
-            value = "/renderQasmAsSvg",
-            produces = "image/svg+xml"
-    )
-    public @ResponseBody
-    byte[] renderQasmAsSvg(@RequestBody String qasmFile) throws IOException {
-        this.renderService.renderQasmAsSvg(qasmFile);
-
-        Path svgPath = Paths.get("content1.svg");
-        byte[] svg = Files.readAllBytes(svgPath);
-        return svg;
     }
 
     @RequestMapping("/")
     public String home() {
-        return "Hello Docker World";
+        return "Latex-Renderer is running";
     }
 }

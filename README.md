@@ -2,7 +2,7 @@
 Service for rendering latex content such as algorithms, diagrams, pictures etc. Latex-Render accepts the document body, the packages that are required to render the document and offers pdf, svg and png as output formats.
 
 ### Version:
-The latest version is: **0.1**
+The latest version is: **1.1**
 
 
 ### Installation:
@@ -13,14 +13,9 @@ The latest version is: **0.1**
 
   Requirements:
 	* Full latex distribution (for example miktex or texlive)
-	* For local SVG support: Installation of Poppler for Windows and Path setup of pdf2svg2.bat  https://community.jalios.com/jcms/jc2_183627/en/pdf2svg2-bat-script
-	* For local PNG support: Ghostscript
-		* The directory containing gswin32c.exe shall be added to PATH.
-		* ImageMagick (including legacy scripts) - rename convert.exe to imgconvert.exe
 
   Install:
 	1. Download Latex-Renderer
-	2. Make sure all required programs are installed.
 	3. 1st time Setup: *mvn package -DskipTests*
 	4. To start Latex-Renderer run: *mvn spring-boot:run*
 
@@ -31,10 +26,11 @@ http://localhost:8082/renderLatex  expects (String content, List<String> latexPa
 
 Export formats are:
 * pdf: returns a PDF document that contains a cutout of the rendered content.
-* fullPdf: returns a PDF document that contains the rendered content on ISO A4 pages.
 * png: returns a PNG that contains the cutout of the rendered content.
 * svg: returns a SVG that contains the cutout of the rendered content.
-* svgz: returns a zipped SVG that contains the cutout of the rendered content.
+* fullPdf: returns a PDF document that contains the rendered content on ISO A4 pages.
+
+
 
 Example:  
 ``\begin{quantikz}
@@ -65,5 +61,5 @@ is included in the REST call via
   This means that all declarations etc. that need to be inserted before `\begin document` must be included in latexPackages.
 * The content and latexPackages must strictly follow the JSON guidelines. This means that all Backslashes, Doublequotes, Newlines etc. must be escaped. Furthermore, is it required that the content of one field is within one line.
 * Necessary Newlines must explicitly be defined with \n. For example in a listing or after a comment: *$a^n$ %this is important **\n***.
-* All cutout formats (pdf, png, svg, svgz) use `standalone` to crop the content. Standalone uses horizontal mode, which doesn't allow for lists or paragraphs. If you want to render lists, tables etc. use the fullPdf export option.
+* All cutout formats (pdf, png, svg) use `standalone` to crop the content. Standalone uses horizontal mode, which doesn't allow for lists or paragraphs. If you want to render lists, tables etc. use the fullPdf export option.
 * Equations can be rendered as `standalone` when using $-Signs to indicate the math environment.

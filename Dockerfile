@@ -4,28 +4,19 @@ COPY . /tmp/latex-renderer
 WORKDIR /tmp/latex-renderer
 RUN mvn package -DskipTests
 
-FROM ubuntu:18.04
+FROM ubuntu:21.04
+# configure installs to run non interactive
+ARG DEBIAN_FRONTEND=noninteractive 
 RUN apt-get update
 RUN apt-get install gnupg -y
 RUN apt-get install ca-certificates -y
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys D6BC243565B2087BC3F897C9277A7293F59E4889
-RUN echo "deb http://miktex.org/download/ubuntu bionic universe" | tee /etc/apt/sources.list.d/miktex.list
-RUN apt-get update
-RUN apt-get install miktex -y
-RUN miktexsetup finish
-RUN initexmf --set-config-value [MPM]AutoInstall=1
-RUN apt-get update
-#miktex admin & package setup
-# update file name database
-RUN initexmf --update-fndb --admin
-# build the font maps
-RUN initexmf --mkmaps --admin
-# create all possible links
-RUN initexmf --mklinks --force --admin
-# Check the package repository for updates, then print the list of updateable packages.
-RUN mpm --find-updates --admin
-# Update all installed packages.
-RUN mpm --update --admin
+
+# install tzdata with a default timezone
+ENV TZ=Europe/Berlin
+RUN apt-get install tzdata
+
+# install texlive
+RUN apt-get install texlive texlive-latex-extra texlive-luatex texlive-xetex texlive-lang-european -y
 
 RUN apt-get install pdf2svg -y &&\
         apt-get install poppler-utils -y && \

@@ -3,7 +3,8 @@ package com.renderLatex.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.renderLatex.entities.LatexContent;
 import com.renderLatex.util.IntegrationTestHelper;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -13,8 +14,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.nio.charset.StandardCharsets;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
@@ -84,6 +87,20 @@ public class renderLatexControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.valueOf("image/svg+xml")))
                 .andReturn();
+    }
+
+    @Test
+    public void renderViaGet() throws Exception {
+        LatexContent latexContent = this.integrationTestHelper.getDefaultLatexContent();
+        System.out.print(this.objectMapper.writeValueAsString(latexContent));
+        System.out.println(this.objectMapper);
+        this.mockMvc.perform(get("/renderLatex")
+                .param("output", latexContent.getOutput())
+                .param("content", java.net.URLEncoder.encode(latexContent.getContent(), StandardCharsets.UTF_8.name()))
+                .param("packages", java.net.URLEncoder.encode(latexContent.getLatexPackages().get(0), StandardCharsets.UTF_8.name()))
+                .param("packages", java.net.URLEncoder.encode(latexContent.getLatexPackages().get(1), StandardCharsets.UTF_8.name())))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.valueOf("image/svg+xml")));
     }
 
 }

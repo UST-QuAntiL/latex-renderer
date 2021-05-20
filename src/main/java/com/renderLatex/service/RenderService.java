@@ -4,6 +4,7 @@ import com.renderLatex.entities.LatexContent;
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGeneratorContext;
 import org.apache.batik.svggen.SVGGraphics2D;
+import org.apache.commons.io.FileUtils;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.printing.PDFPageable;
 import org.apache.pdfbox.rendering.ImageType;
@@ -30,10 +31,22 @@ public class RenderService {
     private final String docStart = "\\begin{document} \n";
     private final String docEnd = " \\end{document} \n";
     private final String userDirectory = Paths.get("").toAbsolutePath().toString();
+    private final String tempDirectory = Paths.get("").toAbsolutePath().toString()+"/tmp";
+
 
 
     @Autowired
     public RenderService(){
+        File file = new File(userDirectory +"/tmp");
+        try{
+            FileUtils.deleteDirectory(file);
+            if (file.mkdir()){
+                System.out.println("directory created");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -41,7 +54,7 @@ public class RenderService {
 
     public String renderAsPdf(LatexContent latexContent){
         final String uuid = UUID.randomUUID().toString();
-        final String currentImagePath = userDirectory + "/" + uuid;
+        final String currentImagePath = tempDirectory + "/" + uuid;
         final String content = latexContent.getContent();
         final String packages = String.join(" ", latexContent.getLatexPackages());
         createTexDoc(content, packages, currentImagePath);
@@ -51,7 +64,7 @@ public class RenderService {
 
     public String renderAsSvg(LatexContent latexContent){
         final String uuid = UUID.randomUUID().toString();
-        final String currentImagePath = userDirectory + "/" + uuid;
+        final String currentImagePath = tempDirectory + "/" + uuid;
         final String content = latexContent.getContent();
         final String packages = String.join(" ", latexContent.getLatexPackages());
         createTexDoc(content, packages, currentImagePath);
@@ -62,7 +75,7 @@ public class RenderService {
 
     public String renderAsPng(LatexContent latexContent){
         final String uuid = UUID.randomUUID().toString();
-        final String currentImagePath = userDirectory + "/" + uuid;
+        final String currentImagePath = tempDirectory + "/" + uuid;
         final String content = latexContent.getContent();
         final String packages = String.join(" ", latexContent.getLatexPackages());
         createTexDoc(content, packages, currentImagePath);
@@ -73,7 +86,7 @@ public class RenderService {
 
     public String renderAsJpg(LatexContent latexContent){
         final String uuid = UUID.randomUUID().toString();
-        final String currentImagePath = userDirectory + "/" + uuid;
+        final String currentImagePath = tempDirectory + "/" + uuid;
         final String content = latexContent.getContent();
         final String packages = String.join(" ", latexContent.getLatexPackages());
         createTexDoc(content, packages, currentImagePath);
@@ -87,7 +100,7 @@ public class RenderService {
     public String renderAsFullPdf(LatexContent latexContent){
         this.latexDocClass = "\\documentclass{article} \n";
         final String uuid = UUID.randomUUID().toString();
-        final String currentImagePath = userDirectory + "/" + uuid;
+        final String currentImagePath = tempDirectory + "/" + uuid;
         final String content = latexContent.getContent();
         final String packages = String.join(" ", latexContent.getLatexPackages());
         createTexDoc(content, packages, currentImagePath);
@@ -100,7 +113,7 @@ public class RenderService {
         File file = new File(currentImagePath);
         if (!file.exists()){
             System.out.println(file.mkdir());
-            System.out.println("file created");
+            System.out.println("directory created");
         }
         try ( FileWriter fileWriter = new FileWriter(currentImagePath + "/renderFile.tex")) {
             fileWriter.write(this.latexDocClass + packages + this.docStart + content + this.docEnd);

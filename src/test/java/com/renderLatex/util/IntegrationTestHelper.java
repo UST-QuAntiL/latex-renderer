@@ -25,7 +25,6 @@ public class IntegrationTestHelper {
         settings.add("\\usetikzlibrary{quantikz} \n");
 
         String output = "svg";
-        LatexContent latexContent = new LatexContent(content, settings,output);
-        return latexContent;
+        return new LatexContent(content, settings, output);
     }
 }

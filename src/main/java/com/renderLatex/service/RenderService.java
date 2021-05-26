@@ -27,11 +27,10 @@ import java.util.Locale;
 
 @Service
 public class RenderService {
-    private String latexDocClass = "\\documentclass[border=0.50001bp,convert={convertexe={imgconvert},outext=.png}]{standalone} \n";
+    private String latexDocClass = "\\documentclass{standalone} \n";
     private final String docStart = "\\begin{document} \n";
     private final String docEnd = " \\end{document} \n";
     private final String tempDirectory = Utils.concatPaths("", "tmp");
-
 
     @Autowired
     public  RenderService() {
@@ -88,9 +87,9 @@ public class RenderService {
             ProcessBuilder processBuilderRenderTex = new ProcessBuilder();
             processBuilderRenderTex.directory(new File(currentRenderPath));
             if(System.getProperty("os.name").startsWith("Windows")){
-                processBuilderRenderTex.command("cmd.exe", "/c", "pdflatex -halt-on-error -shell-escape " +  filename);
+                processBuilderRenderTex.command("cmd.exe", "/c", "pdflatex -halt-on-error -shell-escape " + filename);
             } else {
-                processBuilderRenderTex.command("/bin/bash", "-c", "pdflatex -halt-on-error -shell-escape " +filename);
+                processBuilderRenderTex.command("/bin/bash", "-c", "pdflatex -halt-on-error -shell-escape " + filename);
             }
 
             Process processTex = processBuilderRenderTex.start();
@@ -150,7 +149,6 @@ public class RenderService {
             e.printStackTrace();
         }
     }
-
 
     public void convertToImage(String filename, String currentRenderPath, String output ){
         try (PDDocument document = Loader.loadPDF(new File(Utils.concatPaths(currentRenderPath, filename))))

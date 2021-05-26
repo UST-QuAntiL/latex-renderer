@@ -121,6 +121,13 @@ public class renderLatexControllerTest {
                 .andExpect(content().contentType(MediaType.valueOf("image/svg+xml")));
     }
 
+    @Test
+    public void renderViaGetOnlyRequiredParamsSucceeds() throws Exception {
+        this.mockMvc.perform(get("/renderLatex")
+                .param("content", java.net.URLEncoder.encode("$/pi$", StandardCharsets.UTF_8.name())))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.valueOf("image/svg+xml")));
+    }
 }
 
 

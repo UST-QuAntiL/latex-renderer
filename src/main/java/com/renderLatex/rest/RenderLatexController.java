@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -33,7 +34,6 @@ public class RenderLatexController {
     public RenderLatexController(RenderService renderService) {
         this.renderService = renderService;
     }
-
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
@@ -57,7 +57,6 @@ public class RenderLatexController {
         }
     }
 
-
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500"),
@@ -65,8 +64,14 @@ public class RenderLatexController {
     @GetMapping(
             value = "/renderLatex"
     )
-    public ResponseEntity<byte[]> renderLatexGet(@RequestParam("packages") List<String> packages, @RequestParam("content") String content, @RequestParam("output") String output) {
+    public ResponseEntity<byte[]> renderLatexGet(@RequestParam(value = "packages", required = false) List<String> packages, @RequestParam("content") String content, @RequestParam(value = "output", required = false) String output) {
         try {
+            if (output == null){
+                output = "svg";
+            }
+            if (packages == null){
+                packages = new ArrayList<String>();
+            }
             for(int i = 0; i < packages.size(); i++){
                 packages.set(i, java.net.URLDecoder.decode(packages.get(i), StandardCharsets.UTF_8.name()));
             }
@@ -97,8 +102,6 @@ public class RenderLatexController {
     public String home() {
         return "Latex-Renderer is running";
     }
-
-
 
     private LatexContent handleContentRendering(LatexContent latexContent) throws IOException {
         String filepath ="";

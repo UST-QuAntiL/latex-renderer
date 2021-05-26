@@ -3,6 +3,7 @@ package com.renderLatex.entities;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.http.MediaType;
 
 import java.util.List;
 
@@ -14,6 +15,9 @@ public class LatexContent {
     private String content;
     private List<String> latexPackages;
     private String output;
+    private MediaType contentType;
+    private byte[] returnFile;
+    private String filepath;
 
     public LatexContent(String content, List<String> latexPackages, String output){
         this.content = content;

@@ -25,7 +25,7 @@ RUN apt-get update && \
 	apt-get install -y ant && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/* && \
-	rm -rf /var/cache/oracle-jdk8-installer;
+	rm -rf /var/cache/oracle-jdk11-installer;
 
 
 # Setup JAVA_HOME, this is useful for docker commandline

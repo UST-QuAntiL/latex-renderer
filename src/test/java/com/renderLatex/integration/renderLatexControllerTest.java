@@ -35,7 +35,7 @@ public class renderLatexControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    public void renderLatexSucceeds() throws Exception {
+    public void renderLatexAsSvgSucceeds() throws Exception {
         LatexContent latexContent = this.integrationTestHelper.getDefaultLatexContent();
         System.out.print(this.objectMapper.writeValueAsString(latexContent));
         System.out.println(this.objectMapper);
@@ -51,9 +51,25 @@ public class renderLatexControllerTest {
     @Test
     public void renderLatexAsPdfSucceeds() throws Exception {
         LatexContent latexContent = this.integrationTestHelper.getDefaultLatexContent();
+        latexContent.setOutput("pdf");
         System.out.print(this.objectMapper.writeValueAsString(latexContent));
         System.out.println(this.objectMapper);
-        MvcResult postResult = this.mockMvc.perform(post("/renderLatexAsPdf")
+        MvcResult postResult = this.mockMvc.perform(post("/renderLatex")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(this.objectMapper.writeValueAsString(latexContent)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_PDF))
+                .andReturn();
+
+    }
+
+    @Test
+    public void renderLatexAsFullPdfSucceeds() throws Exception {
+        LatexContent latexContent = this.integrationTestHelper.getDefaultLatexContent();
+        latexContent.setOutput("fullPdf");
+        System.out.print(this.objectMapper.writeValueAsString(latexContent));
+        System.out.println(this.objectMapper);
+        MvcResult postResult = this.mockMvc.perform(post("/renderLatex")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(this.objectMapper.writeValueAsString(latexContent)))
                 .andExpect(status().isOk())
@@ -65,9 +81,10 @@ public class renderLatexControllerTest {
     @Test
     public void renderLatexAsPngSucceeds() throws Exception {
         LatexContent latexContent = this.integrationTestHelper.getDefaultLatexContent();
+        latexContent.setOutput("png");
         System.out.print(this.objectMapper.writeValueAsString(latexContent));
         System.out.println(this.objectMapper);
-        MvcResult postResult = this.mockMvc.perform(post("/renderLatexAsPng")
+        MvcResult postResult = this.mockMvc.perform(post("/renderLatex")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(this.objectMapper.writeValueAsString(latexContent)))
                 .andExpect(status().isOk())
@@ -77,20 +94,21 @@ public class renderLatexControllerTest {
     }
 
     @Test
-    public void renderLatexAsSvgSucceeds() throws Exception {
+    public void renderLatexAsJpgSucceeds() throws Exception {
         LatexContent latexContent = this.integrationTestHelper.getDefaultLatexContent();
+        latexContent.setOutput("jpg");
         System.out.print(this.objectMapper.writeValueAsString(latexContent));
         System.out.println(this.objectMapper);
-        MvcResult postResult = this.mockMvc.perform(post("/renderLatexAsSvg")
+        MvcResult postResult = this.mockMvc.perform(post("/renderLatex")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(this.objectMapper.writeValueAsString(latexContent)))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.valueOf("image/svg+xml")))
+                .andExpect(content().contentType(MediaType.IMAGE_JPEG))
                 .andReturn();
     }
 
     @Test
-    public void renderViaGet() throws Exception {
+    public void renderViaGetSucceeds() throws Exception {
         LatexContent latexContent = this.integrationTestHelper.getDefaultLatexContent();
         System.out.print(this.objectMapper.writeValueAsString(latexContent));
         System.out.println(this.objectMapper);

@@ -1,5 +1,5 @@
 FROM maven:3-jdk-11 as builder
-
+# package latex-renderer
 COPY . /tmp/latex-renderer
 WORKDIR /tmp/latex-renderer
 RUN mvn package -DskipTests
@@ -19,7 +19,7 @@ RUN apt-get install tzdata
 RUN apt-get install texlive texlive-latex-extra texlive-luatex texlive-xetex texlive-lang-european -y
 
 
-#including picoded/ubuntu-openjdk-11-jdk
+#including java requirements
 RUN apt-get update && \
 	apt-get install -y openjdk-11-jdk && \
 	apt-get install -y ant && \
@@ -28,7 +28,7 @@ RUN apt-get update && \
 	rm -rf /var/cache/oracle-jdk11-installer;
 
 
-# Setup JAVA_HOME, this is useful for docker commandline
+# Setup JAVA_HOME
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 RUN export JAVA_HOME
 

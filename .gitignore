@@ -14,7 +14,7 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
-/.idea
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -30,7 +30,6 @@ target/
 *.log
 *.aux
 *.svg
-*.svgz
 *.gz
-*.qasm
 *.idx
+tmp/

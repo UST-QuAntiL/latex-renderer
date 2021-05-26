@@ -52,7 +52,7 @@ public class RenderLatexController {
             Utils.removeDirectory(latexContent.getFilepath());
             return new ResponseEntity<>(latexContent.getReturnFile(), headers, HttpStatus.OK);
         }catch (IOException e) {
-            // Could not succe
+            // Rendering failed
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
@@ -80,13 +80,14 @@ public class RenderLatexController {
         try{
             latexContent = handleContentRendering(latexContent);
             HttpHeaders headers = new HttpHeaders();
+            // Enable long-term caching
             CacheControl cacheControl = CacheControl.maxAge(1000, TimeUnit.DAYS).cachePublic();
             headers.setCacheControl(cacheControl);
             headers.setContentType(latexContent.getContentType());
             Utils.removeDirectory(latexContent.getFilepath());
             return new ResponseEntity<>(latexContent.getReturnFile(), headers, HttpStatus.OK);
         }catch (IOException e) {
-            // Could not succe
+            // Rendering failed
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
@@ -106,33 +107,18 @@ public class RenderLatexController {
         latexContent.setReturnFile(Files.readAllBytes(path));
         switch (latexContent.getOutput()){
             case "pdf":
-//                filepath = this.renderService.renderAsPdf(latexContent);
-//                Path pdfPath = Paths.get(filepath);
-//                latexContent.setReturnFile(Files.readAllBytes(pdfPath));
                 latexContent.setContentType(MediaType.APPLICATION_PDF);
                 break;
             case "png":
-//                filepath = this.renderService.renderAsPng(latexContent);
-//                Path pngPath = Paths.get(filepath);
-//                latexContent.setReturnFile(Files.readAllBytes(pngPath));
                 latexContent.setContentType(MediaType.IMAGE_PNG);
                 break;
             case "jpg":
-//                filepath = this.renderService.renderAsJpg(latexContent);
-//                Path jpgPath = Paths.get(filepath);
-//                latexContent.setReturnFile(Files.readAllBytes(jpgPath));
                 latexContent.setContentType(MediaType.IMAGE_JPEG);
                 break;
             case "fullPdf":
-//                filepath = this.renderService.renderAsFullPdf(latexContent);
-//                Path fullPdfPath = Paths.get(filepath);
-//                latexContent.setReturnFile(Files.readAllBytes(fullPdfPath));
                 latexContent.setContentType(MediaType.APPLICATION_PDF);
                 break;
             case "svg":
-//                filepath = this.renderService.renderAsSvg(latexContent);
-//                Path svgPath = Paths.get(filepath);
-//                latexContent.setReturnFile(Files.readAllBytes(svgPath));
                 latexContent.setContentType(MediaType.valueOf("image/svg+xml"));
                 break;
         }

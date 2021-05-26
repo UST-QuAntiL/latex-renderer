@@ -6,15 +6,12 @@ import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGeneratorContext;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.printing.PDFPageable;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -25,9 +22,8 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.io.*;
-import java.nio.file.Paths;
 import java.util.Locale;
-import java.util.UUID;
+
 
 @Service
 public class RenderService {
@@ -52,7 +48,8 @@ public class RenderService {
     }
 
     public String render(LatexContent latexContent){
-        final String currentImagePath = Utils.extendPathWithUUID(tempDirectory);
+        //create new Folder for renderingProcess and get its Path
+        final String currentRenderPath = Utils.createPathWithUUID(tempDirectory);
         final String content = latexContent.getContent();
         final String packages = String.join(" ", latexContent.getLatexPackages());
 
@@ -63,76 +60,21 @@ public class RenderService {
         }
 
         //create and render TexDocument
-        createTexDoc(content, packages, currentImagePath);
-        renderTex("renderFile.tex",  currentImagePath);
+        createTexDoc(content, packages, currentRenderPath);
+        renderTex("renderFile.tex",  currentRenderPath);
 
         // render content as Image if requested
         if (output.equals("svg")){
-            convertToSvg("renderFile.pdf", currentImagePath);
+            convertToSvg("renderFile.pdf", currentRenderPath);
         } else if (output.equals("jpg") || output.equals("png")){
-            convertToImage("renderFile.pdf", currentImagePath, output);
+            convertToImage("renderFile.pdf", currentRenderPath, output);
         }
 
-        return Utils.concatPaths(currentImagePath, "renderFile." + output);
+        return Utils.concatPaths(currentRenderPath, "renderFile." + output);
     }
 
-    public String renderAsPdf(LatexContent latexContent){
-        final String currentImagePath = Utils.extendPathWithUUID(tempDirectory);
-        final String content = latexContent.getContent();
-        final String packages = String.join(" ", latexContent.getLatexPackages());
-        createTexDoc(content, packages, currentImagePath);
-        renderTex("renderFile.tex",  currentImagePath);
-        return Utils.concatPaths(currentImagePath, "renderFile.pdf");
-    }
-
-    public String renderAsSvg(LatexContent latexContent){
-        final String currentImagePath = Utils.extendPathWithUUID(tempDirectory);
-        final String content = latexContent.getContent();
-        final String packages = String.join(" ", latexContent.getLatexPackages());
-        createTexDoc(content, packages, currentImagePath);
-        renderTex("renderFile.tex", currentImagePath);
-        convertToSvg("renderFile.pdf", currentImagePath);
-        return Utils.concatPaths(currentImagePath, "renderFile.svg");
-    }
-
-    public String renderAsPng(LatexContent latexContent){
-        final String currentImagePath = Utils.extendPathWithUUID(tempDirectory);
-        final String content = latexContent.getContent();
-        final String packages = String.join(" ", latexContent.getLatexPackages());
-        createTexDoc(content, packages, currentImagePath);
-        renderTex("renderFile.tex", currentImagePath);
-        convertToImage("renderFile.pdf", currentImagePath, "png");
-        return Utils.concatPaths(currentImagePath, "renderFile.png");
-    }
-
-    public String renderAsJpg(LatexContent latexContent){
-        final String currentImagePath = Utils.extendPathWithUUID(tempDirectory);
-        final String content = latexContent.getContent();
-        final String packages = String.join(" ", latexContent.getLatexPackages());
-        createTexDoc(content, packages, currentImagePath);
-        renderTex("renderFile.tex", currentImagePath);
-        convertToImage("renderFile.pdf", currentImagePath, "jpg");
-        return Utils.concatPaths(currentImagePath, "renderFile.jpg");
-    }
-
-    public String renderAsFullPdf(LatexContent latexContent){
-        this.latexDocClass = "\\documentclass{article} \n";
-        final String currentImagePath = Utils.extendPathWithUUID(tempDirectory);
-        final String content = latexContent.getContent();
-        final String packages = String.join(" ", latexContent.getLatexPackages());
-        createTexDoc(content, packages, currentImagePath);
-        renderTex("renderFile.tex", currentImagePath);
-        return Utils.concatPaths(currentImagePath, "renderFile.pdf");
-    }
-
-
-    public void createTexDoc(String content, String packages, String currentImagePath){
-        File file = new File(currentImagePath);
-        if (!file.exists()){
-            System.out.println(file.mkdir());
-            System.out.println("directory created");
-        }
-        try ( FileWriter fileWriter = new FileWriter(currentImagePath + "/renderFile.tex")) {
+    public void createTexDoc(String content, String packages, String currentRenderPath){
+        try ( FileWriter fileWriter = new FileWriter(Utils.concatPaths(currentRenderPath, "renderFile.tex"))) {
             fileWriter.write(this.latexDocClass + packages + this.docStart + content + this.docEnd);
             fileWriter.close();
         } catch (IOException e) {
@@ -141,14 +83,13 @@ public class RenderService {
         }
     }
 
-    public void renderTex(String filename, String currentImagePath ){
+    public void renderTex(String filename, String currentRenderPath ){
         try {
             ProcessBuilder processBuilderRenderTex = new ProcessBuilder();
+            processBuilderRenderTex.directory(new File(currentRenderPath));
             if(System.getProperty("os.name").startsWith("Windows")){
-                processBuilderRenderTex.directory(new File(currentImagePath));
                 processBuilderRenderTex.command("cmd.exe", "/c", "pdflatex -halt-on-error -shell-escape " +  filename);
             } else {
-                processBuilderRenderTex.directory(new File(currentImagePath));
                 processBuilderRenderTex.command("/bin/bash", "-c", "pdflatex -halt-on-error -shell-escape " +filename);
             }
 
@@ -177,8 +118,8 @@ public class RenderService {
         }
     }
 
-    public void convertToSvg(String filename, String currentImagePath ) {
-        try (PDDocument document = Loader.loadPDF(new File(currentImagePath+ "/" + filename))) {
+    public void convertToSvg(String filename, String currentRenderPath ) {
+        try (PDDocument document = Loader.loadPDF(new File( Utils.concatPaths(currentRenderPath, filename)))) {
             DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
 
             String svgNS = "http://www.w3.org/2000/svg";
@@ -193,7 +134,7 @@ public class RenderService {
                     break;
                 }
 
-                String svgFName = currentImagePath + "/renderFile.svg";
+                String svgFName = Utils.concatPaths(currentRenderPath, "renderFile.svg");
                 (new File(svgFName)).createNewFile();
 
                 SVGGraphics2D svgGenerator = new SVGGraphics2D(ctx, false);
@@ -211,8 +152,8 @@ public class RenderService {
     }
 
 
-    public void convertToImage(String filename, String currentImagePath, String type ){
-        try (PDDocument document = Loader.loadPDF(new File(currentImagePath+ "/" + filename)))
+    public void convertToImage(String filename, String currentRenderPath, String output ){
+        try (PDDocument document = Loader.loadPDF(new File(Utils.concatPaths(currentRenderPath, filename))))
             {
                 PDFRenderer pdfRenderer = new PDFRenderer(document);
                 for (int page = 0; page < document.getNumberOfPages(); ++page)
@@ -222,7 +163,7 @@ public class RenderService {
                         break;
                     }
                     BufferedImage bim = pdfRenderer.renderImageWithDPI(page, 300, ImageType.RGB);
-                    ImageIO.write (bim, type.toUpperCase(Locale.ROOT), new File (currentImagePath+"/renderFile." + type.toLowerCase(Locale.ROOT)));
+                    ImageIO.write (bim, output.toUpperCase(Locale.ROOT), new File (Utils.concatPaths(currentRenderPath, "renderFile." + output)));
                 }
             } catch (IOException e) {
             e.printStackTrace();

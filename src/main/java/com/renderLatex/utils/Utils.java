@@ -10,8 +10,7 @@ import java.util.UUID;
 public class Utils {
     private Utils() {}
     /*
-    Remove the filename from the filepath (always 15 characters in Latex-Renderer)
-    Then delete the directory and all included files
+    Delete the directory and all included files
      */
     public static void removeDirectory(String filepath) throws IOException {
         filepath = Paths.get(filepath).getParent().toString();
@@ -23,14 +22,14 @@ public class Utils {
         return Paths.get(first).resolve(second).toAbsolutePath().toString();
     }
 
-    public static String extendPathWithUUID(String path){
+    public static String createPathWithUUID(String path){
         final String uuid = UUID.randomUUID().toString();
-        return Paths.get(path).resolve(uuid).toAbsolutePath().toString();
+        final String uuidPath = Paths.get(path).resolve(uuid).toAbsolutePath().toString();
+        File file = new File(uuidPath);
+        if (!file.exists()){
+            System.out.println(file.mkdir());
+            System.out.println("directory created");
+        }
+        return uuidPath;
     }
-
-    public static String getcurrentFolder(String path){
-        File file = new File(path);
-        return file.getName();
-    }
-
 }

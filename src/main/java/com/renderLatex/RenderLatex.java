@@ -1,6 +1,5 @@
 package com.renderLatex;
 
-import com.renderLatex.rest.RenderLatexController;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -17,7 +16,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Slf4j
 @OpenAPIDefinition(info = @Info(
         title = "latex-renderer",
-        version = "1.0",
+        version = "1.1.0",
         description = "Platform for Sharing Quantum Software",
         license = @License(name = "Apache 2.0", url = "http://www.apache.org/licenses/LICENSE-2.0.html"),
         contact = @Contact(url = "https://github.com/UST-QuAntiL/latex-renderer", name = "GitHub Repository")))

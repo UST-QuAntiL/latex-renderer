@@ -1,54 +1,80 @@
 package com.renderLatex.service;
 
 import com.renderLatex.entities.LatexContent;
+import com.renderLatex.utils.Utils;
+import org.apache.batik.dom.GenericDOMImplementation;
+import org.apache.batik.svggen.SVGGeneratorContext;
+import org.apache.batik.svggen.SVGGraphics2D;
+import org.apache.commons.io.FileUtils;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.printing.PDFPageable;
+import org.apache.pdfbox.rendering.ImageType;
+import org.apache.pdfbox.rendering.PDFRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import java.awt.print.PrinterException;
 import java.io.*;
-import java.nio.file.Paths;
+import java.util.Locale;
+
 
 @Service
 public class RenderService {
-    private String latexDocClass = "\\documentclass[border=0.50001bp,convert={convertexe={imgconvert},outext=.png}]{standalone} \n";
+    private String latexDocClass = "\\documentclass{standalone} \n";
     private final String docStart = "\\begin{document} \n";
     private final String docEnd = " \\end{document} \n";
-    private String packages = "";
-    private String content = "";
+    private final String tempDirectory = Utils.concatPaths("", "tmp");
 
     @Autowired
-    public RenderService(){
-
+    public  RenderService() {
+        // Recreate temp Folder to clean up all old files when restarting
+        File file = new File(tempDirectory);
+        try {
+            FileUtils.deleteDirectory(file);
+            if (file.mkdir()) {
+                System.out.println("directory created");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void renderAsPdf(LatexContent latexContent){
-        this.content = latexContent.getContent();
-        this.packages = "";
-        latexContent.getLatexPackages().forEach(item -> this.packages += (item + " \n "));
-        createTexDoc();
-        renderTex("renderFile.tex");
+    public String render(LatexContent latexContent){
+        //create new Folder for renderingProcess and get its Path
+        final String currentRenderPath = Utils.createPathWithUUID(tempDirectory);
+        final String content = latexContent.getContent();
+        final String packages = String.join(" ", latexContent.getLatexPackages());
+
+        String output = latexContent.getOutput();
+        if (output.equals("fullPdf")) {
+            this.latexDocClass = "\\documentclass{article} \n";
+            output = "pdf";
+        }
+
+        //create and render TexDocument
+        createTexDoc(content, packages, currentRenderPath);
+        renderTex("renderFile.tex",  currentRenderPath);
+
+        // render content as Image if requested
+        if (output.equals("svg")){
+            convertToSvg("renderFile.pdf", currentRenderPath);
+        } else if (output.equals("jpg") || output.equals("png")){
+            convertToImage("renderFile.pdf", currentRenderPath, output);
+        }
+
+        return Utils.concatPaths(currentRenderPath, "renderFile." + output);
     }
 
-    public void renderAsSvg(LatexContent latexContent, boolean zipped){
-        this.content = latexContent.getContent();
-        this.packages = "";
-        latexContent.getLatexPackages().forEach(item -> this.packages += (item + " \n "));
-        createTexDoc();
-        renderTex("renderFile.tex");
-        convertToSvg(zipped,"renderFile.pdf");
-    }
-
-    public void renderAsPng(LatexContent latexContent){
-        this.content = latexContent.getContent();
-        this.packages = "";
-        latexContent.getLatexPackages().forEach(item -> this.packages += (item + " \n "));
-        createTexDoc();
-        renderTex("renderFile.tex");
-        convertToPng("renderFile.pdf");
-    }
-
-    public void createTexDoc(){
-        try ( FileWriter fileWriter = new FileWriter("renderFile.tex")) {
-            fileWriter.write(this.latexDocClass + this.packages + this.docStart + this.content + this.docEnd);
+    public void createTexDoc(String content, String packages, String currentRenderPath){
+        try ( FileWriter fileWriter = new FileWriter(Utils.concatPaths(currentRenderPath, "renderFile.tex"))) {
+            fileWriter.write(this.latexDocClass + packages + this.docStart + content + this.docEnd);
             fileWriter.close();
         } catch (IOException e) {
             System.out.println(e.toString());
@@ -56,31 +82,10 @@ public class RenderService {
         }
     }
 
-    public void renderAsFullPdf(LatexContent latexContent){
-        this.latexDocClass = "\\documentclass{article} \n";
-        this.packages = "";
-        this.content = latexContent.getContent();
-        latexContent.getLatexPackages().forEach(item -> this.packages += (item + " \n "));
-        createTexDoc();
-        renderTex("renderFile.tex");
-    }
-
-    public void renderQasmAsPdf(String qasmContent){
-        createQasmFile(qasmContent);
-        convertToQasmTex();
-        renderTex("qasm.tex");
-    }
-
-    public void renderQasmAsSvg(String qasmContent){
-        createQasmFile(qasmContent);
-        convertToQasmTex();
-        renderTex("qasm.tex");
-        convertToSvg(false, "qasm.pdf");
-    }
-
-    public void renderTex(String filename){
+    public void renderTex(String filename, String currentRenderPath ){
         try {
             ProcessBuilder processBuilderRenderTex = new ProcessBuilder();
+            processBuilderRenderTex.directory(new File(currentRenderPath));
             if(System.getProperty("os.name").startsWith("Windows")){
                 processBuilderRenderTex.command("cmd.exe", "/c", "pdflatex -halt-on-error -shell-escape " + filename);
             } else {
@@ -112,128 +117,53 @@ public class RenderService {
         }
     }
 
-    public void convertToSvg(boolean zipped, String filename){
-        try {
-            String userDirectory = Paths.get("").toAbsolutePath().toString();
+    public void convertToSvg(String filename, String currentRenderPath ) {
+        try (PDDocument document = Loader.loadPDF(new File( Utils.concatPaths(currentRenderPath, filename)))) {
+            DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
 
-            ProcessBuilder processBuilderRenderSvg = new ProcessBuilder();
-//            processBuilderRenderSvg.command("cmd.exe", "/c", "inkscape --without-gui --file=renderFile.pdf --export-plain-svg=renderFile.svg"); works but svg not pretty
+            String svgNS = "http://www.w3.org/2000/svg";
+            Document svgDocument = domImpl.createDocument(svgNS, "svg", null);
+            SVGGeneratorContext ctx = SVGGeneratorContext.createDefault(svgDocument);
+            ctx.setEmbeddedFontsOn(true);
 
-            if(System.getProperty("os.name").startsWith("Windows")) {
-                if (zipped) {
-                    processBuilderRenderSvg.command("cmd.exe", "/c", "pdf2svg2.bat \"" + userDirectory + "\\" + filename + "\" \"" + userDirectory + "\" -z");
-                } else {
-                    processBuilderRenderSvg.command("cmd.exe", "/c", "pdf2svg2.bat \"" + userDirectory + "\\" + filename + "\" \"" + userDirectory + "\"");
+
+            for (int i = 0; i < document.getNumberOfPages(); i++) {
+                if (i > 0){
+                    // If rendering for more than 1 page is supported adjust filename and return
+                    break;
                 }
-            } else {
-                if (zipped) {
-                    processBuilderRenderSvg.command("/bin/bash", "-c",  "pdf2svg "+ filename + " " + "content1.svg -z" );
-                } else {
-                    processBuilderRenderSvg.command("/bin/bash", "-c",  "pdf2svg "+ filename + " " + "content1.svg");
-                }
-            }
-            Process processSvg = processBuilderRenderSvg.start();
 
-            BufferedReader readerSvg = new BufferedReader(
-                    new InputStreamReader(processSvg.getInputStream()));
+                String svgFName = Utils.concatPaths(currentRenderPath, "renderFile.svg");
+                (new File(svgFName)).createNewFile();
 
-            StringBuilder outputSvg = new StringBuilder();
-            String lineSvg;
-            while ((lineSvg = readerSvg.readLine()) != null) {
-                outputSvg.append(lineSvg + "\n");
+                SVGGraphics2D svgGenerator = new SVGGraphics2D(ctx, false);
+
+                PDFPageable pageable = new PDFPageable(document);
+                Printable page = pageable.getPrintable(i);
+                PageFormat format = pageable.getPageFormat(i);
+
+                page.print(svgGenerator, format, i);
+                svgGenerator.stream(svgFName);
             }
-            int exitValSvg = processSvg.waitFor();
-            if (exitValSvg == 0) {
-                System.out.println("Successfully rendered Svg");
-                System.out.println(outputSvg);
-            } else {
-                System.out.println("Svg could not be rendered");
-            }
-        } catch (Exception e) {
-            System.out.println(e.toString());
+        } catch (IOException | PrinterException e) {
             e.printStackTrace();
         }
     }
 
-    public void createQasmFile(String qasmContent){
-        try ( FileWriter fileWriter = new FileWriter("test.qasm")) {
-            fileWriter.write(qasmContent);
-            fileWriter.close();
-        } catch (IOException e) {
-            System.out.println(e.toString());
-            e.printStackTrace();
-        }
-    }
-
-    public void convertToQasmTex(){
-        try {
-            ProcessBuilder processBuilderRender = new ProcessBuilder();
-            if(System.getProperty("os.name").startsWith("Windows")) {
-                processBuilderRender.command("cmd.exe", "/c", "python qasm2tex.py test.qasm");
-            } else {
-                //TODO: python dependencies in Docker
-                processBuilderRender.command("/bin/bash", "-c", "python qasm2tex.py test.qasm");
-            }
-            Process process = processBuilderRender.start();
-
-            StringBuilder output = new StringBuilder();
-
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line + "\n");
-            }
-
-            int exitVal = process.waitFor();
-            if (exitVal == 0) {
-                System.out.println("Successfully rendered Tex");
-                try ( FileWriter fileWriter = new FileWriter("qasm.tex")) {
-                    fileWriter.write(String.valueOf(output));
-                    fileWriter.close();
-                } catch (IOException e) {
-                    System.out.println(e.toString());
-                    e.printStackTrace();
+    public void convertToImage(String filename, String currentRenderPath, String output ){
+        try (PDDocument document = Loader.loadPDF(new File(Utils.concatPaths(currentRenderPath, filename))))
+            {
+                PDFRenderer pdfRenderer = new PDFRenderer(document);
+                for (int page = 0; page < document.getNumberOfPages(); ++page)
+                {
+                    if (page > 0){
+                        // If rendering for more than 1 page is supported adjust filename and return
+                        break;
+                    }
+                    BufferedImage bim = pdfRenderer.renderImageWithDPI(page, 300, ImageType.RGB);
+                    ImageIO.write (bim, output.toUpperCase(Locale.ROOT), new File (Utils.concatPaths(currentRenderPath, "renderFile." + output)));
                 }
-                System.out.println(output);
-            } else {
-                System.out.println("Qasm could not be rendered");
-            }
-        } catch (Exception e) {
-            System.out.println(e.toString());
-            e.printStackTrace();
-        }
-    }
-
-    public void convertToPng(String filename){
-        try {
-            ProcessBuilder processBuilderRender = new ProcessBuilder();
-
-            if(System.getProperty("os.name").startsWith("Windows")) {
-                //should be done via imagemagick integration
-            } else {
-                processBuilderRender.command("/bin/bash", "-c",  "pdftoppm -png "+ filename + " > renderFile.png");
-            }
-            Process process = processBuilderRender.start();
-
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()));
-
-            StringBuilder output = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line + "\n");
-            }
-            int exitVal = process.waitFor();
-            if (exitVal == 0) {
-                System.out.println("Successfully rendered PNG");
-                System.out.println(output);
-            } else {
-                System.out.println("PNG could not be rendered");
-            }
-        } catch (Exception e) {
-            System.out.println(e.toString());
+            } catch (IOException e) {
             e.printStackTrace();
         }
     }

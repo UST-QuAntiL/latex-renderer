@@ -41,8 +41,9 @@ It is possible to request the data with either a POST- or a GET-Request
 A minimal GET-Request example to render *pi* without defining any packages or an ouput format: ``http://localhost:8082/renderLatex?content=$%5Cpi$``
 
 A POST-Request example that sets the output format to *pdf*, includes the two necessary packages *\usepackage{tikz} and \usetikzlibrary{quantikz}* and sets the content to render a small Quantum Circuit example:
-``{"content":"\\begin{quantikz} \\lstick{\\ket{0}} & \\phase{\\alpha} & \\gate{H} & \\phase{\\beta} & \\gate{H} & \\phase{\\gamma} & \\rstick{Arbitrary\\\\pure state}\\qw \\end{quantikz}","latexPackages":["\\usepackage{tikz}","\\usetikzlibrary{quantikz}"],"output":"pdf"}``
-
+```json
+{"content":"\\begin{quantikz} \\lstick{\\ket{0}} & \\phase{\\alpha} & \\gate{H} & \\phase{\\beta} & \\gate{H} & \\phase{\\gamma} & \\rstick{Arbitrary\\\\pure state}\\qw \\end{quantikz}","latexPackages":["\\usepackage{tikz}","\\usetikzlibrary{quantikz}"],"output":"pdf"}``
+```
 The same example as before just sent via a GET-Request:
 ``http://localhost:8082/renderLatex?packages=%5Cusepackage%7Btikz%7D&packages=%5Cusetikzlibrary%7Bquantikz%7D&output=pdf&content=%5Cbegin%7Bquantikz%7D+%5Clstick%7B%5Cket%7B0%7D%7D+%26+%5Cphase%7B%5Calpha%7D+%26+%5Cgate%7BH%7D+%26+%5Cphase%7B%5Cbeta%7D+%26+%5Cgate%7BH%7D+%26+%5Cphase%7B%5Cgamma%7D+%26+%5Crstick%7BArbitrary%5C%5Cpure+state%7D%5Cqw+%5Cend%7Bquantikz%7D
 ``
@@ -60,11 +61,14 @@ The same example as before just sent via a GET-Request:
 
 ### Notes:
 * LatexRenderer creates a new latex document with the following structure:
+  ```latex
   \documentclass{standalone/article}  
   INSERT SENT LATEXPACKAGES  
   \begin{document}  
   INSERT SENT CONTENT  
   \end{document}  
+  ```
+
   This means that all declarations etc. that need to be inserted before `\begin document` must be included in latexPackages.
 * The content and latexPackages must strictly follow the JSON guidelines. This means that all backslashes, doublequotes, newlines etc. must be escaped. Furthermore, is it required that the content of one field is within one line.
 * Necessary newlines must explicitly be defined with \n. For example in a listing or after a comment: *$a^n$ %this is important **\n***.

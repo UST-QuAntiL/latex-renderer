@@ -4,7 +4,7 @@ name: Push docker images to Dockerhub
 
 on:
   push:
-    branches: '**'
+    branches: master
 
 jobs:
   multi:
@@ -27,4 +27,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: planqk/latex-renderer:test
+          tags: planqk/latex-renderer:latest

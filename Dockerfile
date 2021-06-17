@@ -18,7 +18,6 @@ RUN apt-get install tzdata
 # install texlive
 RUN apt-get install texlive texlive-latex-extra texlive-luatex texlive-xetex texlive-lang-european -y
 
-
 #including java requirements
 RUN apt-get update && \
 	apt-get install -y openjdk-11-jdk && \
@@ -27,12 +26,9 @@ RUN apt-get update && \
 	rm -rf /var/lib/apt/lists/* && \
 	rm -rf /var/cache/oracle-jdk11-installer;
 
-
 # Setup JAVA_HOME
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 RUN export JAVA_HOME
 
-
-
-COPY --from=builder /tmp/latex-renderer/target/api-1.1.0-SNAPSHOT.jar app.jar
+COPY --from=builder /tmp/latex-renderer/target/latex-renderer-1.1.0-SNAPSHOT.jar app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]

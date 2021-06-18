@@ -5,6 +5,8 @@ name: Push docker images to Dockerhub
 on:
   push:
     branches: master
+    tags:
+      - "v*.*.*"
 
 jobs:
   multi:
@@ -14,6 +16,9 @@ jobs:
         uses: actions/checkout@v2
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
+      - name: Set output
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
@@ -22,9 +27,18 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Build and push LaTex Renderer
+      - name: Build and push latest LaTex Renderer
+        if: ${{ steps.vars.outputs.tag }} == 'master'
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
           tags: planqk/latex-renderer:latest
+          
+      - name: Build and push version of LaTex Renderer
+        if: ${{ steps.vars.outputs.tag }} != 'master'
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: planqk/latex-renderer:${{ steps.vars.outputs.tag }}

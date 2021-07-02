@@ -2,9 +2,13 @@ package com.renderLatex.service;
 
 import com.renderLatex.entities.LatexContent;
 import com.renderLatex.utils.Utils;
+import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
+import org.apache.batik.bridge.*;
 import org.apache.batik.dom.GenericDOMImplementation;
+import org.apache.batik.gvt.GraphicsNode;
 import org.apache.batik.svggen.SVGGeneratorContext;
 import org.apache.batik.svggen.SVGGraphics2D;
+import org.apache.batik.util.XMLResourceDescriptor;
 import org.apache.commons.io.FileUtils;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -15,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.svg.SVGDocument;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -27,7 +33,8 @@ import java.util.Locale;
 
 @Service
 public class RenderService {
-    private String latexDocClass = "\\documentclass{standalone} \n";
+    // TODO varwidth should be optional parameter?
+    private String latexDocClass = "\\documentclass[margin=7pt, varwidth]{standalone} \n";
     private final String docStart = "\\begin{document} \n";
     private final String docEnd = " \\end{document} \n";
     private final String tempDirectory = Utils.concatPaths("", "tmp");
@@ -49,8 +56,9 @@ public class RenderService {
     public String render(LatexContent latexContent){
         //create new Folder for renderingProcess and get its Path
         final String currentRenderPath = Utils.createPathWithUUID(tempDirectory);
-        final String content = latexContent.getContent();
-        final String packages = String.join(" ", latexContent.getLatexPackages());
+        String content = latexContent.getContent();
+        content = content.replaceAll("(\\t(?!([^\\w]| )))","\\\\t");
+        String packages = String.join(" ", latexContent.getLatexPackages());
 
         String output = latexContent.getOutput();
         if (output.equals("fullPdf")) {
@@ -144,6 +152,29 @@ public class RenderService {
 
                 page.print(svgGenerator, format, i);
                 svgGenerator.stream(svgFName);
+
+                SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory(
+                        XMLResourceDescriptor.getXMLParserClassName());
+
+                File file = new File(svgFName);
+                InputStream is = new FileInputStream(file);
+
+                Document document2 = factory.createDocument(
+                        file.toURI().toURL().toString(), is);
+                UserAgent agent = new UserAgentAdapter();
+                DocumentLoader loader= new DocumentLoader(agent);
+                BridgeContext context = new BridgeContext(agent, loader);
+                context.setDynamic(true);
+                GVTBuilder builder= new GVTBuilder();
+                GraphicsNode root= builder.build(context, document2);
+
+                Element svgRoot = document2.getDocumentElement();
+                double width = root.getPrimitiveBounds().getWidth();
+                double height = root.getPrimitiveBounds().getHeight();
+                svgRoot.setAttributeNS(null, "width", String.valueOf(width*2.25));
+                svgRoot.setAttributeNS(null, "height", String.valueOf(height*2.25));
+                svgRoot.setAttributeNS(null, "viewBox", "0 0 " + String.valueOf(width) + " " + String.valueOf(height));
+                saveSvgDocumentToFile((SVGDocument) document2, file);
             }
         } catch (IOException | PrinterException e) {
             e.printStackTrace();
@@ -165,6 +196,14 @@ public class RenderService {
                 }
             } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void saveSvgDocumentToFile(SVGDocument document, File file)
+            throws FileNotFoundException, IOException {
+        SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+        try (Writer out = new OutputStreamWriter(new FileOutputStream(file), "UTF-8")) {
+            svgGenerator.stream(document.getDocumentElement(), out);
         }
     }
 }

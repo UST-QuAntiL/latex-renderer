@@ -38,8 +38,8 @@ It is possible to request the data with either a POST- or a GET-Request
 
 **Optional** attributes: 
 * *packages* (default: None, type: List<String>): List of packages that is required for rendering the content 
-* output (default: "svg", type: String): Rendering output format, according to description above
-* varwidth (default: None, type: Number/Float): When rendering text it is recommended to set varwidth. Varwidth manages the linebreaks for the standalone package which is used for all output types but "fullpdf". 
+* *output* (default: "svg", type: String): Rendering output format, according to description above
+* *varwidth* (default: None, type: Number/Float): When rendering text it is recommended to set varwidth. Varwidth manages the linebreaks for the standalone package which is used for all output types but "fullpdf". 
 Further varwidth guarantees a maximum document width of varwidth\textwidth, meaning a value of 1 will render the documentcontent on a DINA4 page.
 
 ### Userguide:

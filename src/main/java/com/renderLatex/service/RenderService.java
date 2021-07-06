@@ -28,15 +28,12 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.io.*;
-import java.util.Locale;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 
 @Service
 public class RenderService {
-    // TODO varwidth should be optional parameter?
-    private String latexDocClass = "\\documentclass[margin=7pt, varwidth]{standalone} \n";
-    private final String docStart = "\\begin{document} \n";
-    private final String docEnd = " \\end{document} \n";
     private final String tempDirectory = Utils.concatPaths("", "tmp");
 
     @Autowired
@@ -61,13 +58,22 @@ public class RenderService {
         String packages = String.join(" ", latexContent.getLatexPackages());
 
         String output = latexContent.getOutput();
+
+        String docClass = "{standalone}";
         if (output.equals("fullPdf")) {
-            this.latexDocClass = "\\documentclass{article} \n";
+            docClass = "{article}";
             output = "pdf";
         }
 
+        List<String> docClassAttributes = new ArrayList<>();
+        docClassAttributes.add("margin=7pt");
+        if(latexContent.getVarwidth() > 0){
+            docClassAttributes.add("varwidth=" + Utils.roundFloat(latexContent.getVarwidth(),3)+"\\textwidth");
+        }
+        String latexDocClass = "\\documentclass" + docClassAttributes + docClass + "\n";
+
         //create and render TexDocument
-        createTexDoc(content, packages, currentRenderPath);
+        createTexDoc(content, packages, currentRenderPath, latexDocClass);
         renderTex("renderFile.tex",  currentRenderPath);
 
         // render content as Image if requested
@@ -80,9 +86,11 @@ public class RenderService {
         return Utils.concatPaths(currentRenderPath, "renderFile." + output);
     }
 
-    public void createTexDoc(String content, String packages, String currentRenderPath){
+    public void createTexDoc(String content, String packages, String currentRenderPath, String latexDocClass){
+        final String docStart = "\\begin{document} \n";
+        final String docEnd = " \\end{document} \n";
         try ( FileWriter fileWriter = new FileWriter(Utils.concatPaths(currentRenderPath, "renderFile.tex"))) {
-            fileWriter.write(this.latexDocClass + packages + this.docStart + content + this.docEnd);
+            fileWriter.write(latexDocClass + packages + docStart + content + docEnd);
             fileWriter.close();
         } catch (IOException e) {
             System.out.println(e.toString());
@@ -202,7 +210,7 @@ public class RenderService {
     public static void saveSvgDocumentToFile(SVGDocument document, File file)
             throws FileNotFoundException, IOException {
         SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
-        try (Writer out = new OutputStreamWriter(new FileOutputStream(file), "UTF-8")) {
+        try (Writer out = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
             svgGenerator.stream(document.getDocumentElement(), out);
         }
     }

@@ -4,6 +4,8 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Paths;
 import java.util.UUID;
 
@@ -31,5 +33,9 @@ public class Utils {
             System.out.println("directory created");
         }
         return uuidPath;
+    }
+
+    public static float roundFloat(float d, int decimalPlace) {
+        return BigDecimal.valueOf(d).setScale(decimalPlace, RoundingMode.HALF_UP).floatValue();
     }
 }

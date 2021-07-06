@@ -64,7 +64,10 @@ public class RenderLatexController {
     @GetMapping(
             value = "/renderLatex"
     )
-    public ResponseEntity<byte[]> renderLatexGet(@RequestParam(value = "packages", required = false) List<String> packages, @RequestParam("content") String content, @RequestParam(value = "output", required = false) String output) {
+    public ResponseEntity<byte[]> renderLatexGet(@RequestParam(value = "packages", required = false) List<String> packages,
+                                                 @RequestParam("content") String content,
+                                                 @RequestParam(value = "output", required = false) String output,
+                                                 @RequestParam(value = "varwidth", required = false) Float varwidth) {
         try {
             if (output == null){
                 output = "svg";
@@ -76,12 +79,16 @@ public class RenderLatexController {
                 packages.set(i, java.net.URLDecoder.decode(packages.get(i), StandardCharsets.UTF_8.name()));
             }
             content = java.net.URLDecoder.decode(content, StandardCharsets.UTF_8.name());
+
+            if (varwidth == null ){
+                varwidth = -1.0f;
+            }
         } catch (UnsupportedEncodingException e) {
             // Could not Decode URL
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
-        LatexContent latexContent= new LatexContent(content, packages, output);
+        LatexContent latexContent= new LatexContent(content, packages, output, varwidth);
         try{
             latexContent = handleContentRendering(latexContent);
             HttpHeaders headers = new HttpHeaders();

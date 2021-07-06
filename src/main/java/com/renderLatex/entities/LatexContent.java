@@ -19,10 +19,18 @@ public class LatexContent {
     private MediaType contentType;
     private byte[] returnFile;
     private String filepath;
+    private float varwidth = -1;
 
     public LatexContent(String content, List<String> latexPackages,String output){
         this.content = content;
         this.latexPackages = latexPackages;
         this.output = output;
+    }
+
+    public LatexContent(String content, List<String> latexPackages,String output, float varwidth){
+        this.content = content;
+        this.latexPackages = latexPackages;
+        this.output = output;
+        this.varwidth = varwidth;
     }
 }

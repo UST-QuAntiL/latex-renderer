@@ -7,7 +7,7 @@ The latest version is: **1.1.0**
 
 ### Installation:
 * As a **Docker Container** (highly recommended)
-	1. Pull and Run image via: ``docker run --rm -p 8082:8082 planqk/latex-renderer:latest``
+	1. Pull and Run image via: ``docker run --rm -p 5030:5030 planqk/latex-renderer:latest``
 
 * As a **Spring-Boot** project:
 
@@ -20,11 +20,11 @@ The latest version is: **1.1.0**
 	4. To start Latex-Renderer run: ``mvn spring-boot:run``
 
 ### API:
-Runs on Port 8082.
+Runs on Port 5030.
 
 It is possible to request the data with either a POST- or a GET-Request
-* POST: http://localhost:8082/renderLatex  expects (String content, List<String> latexPackages, String output) as [JSON](https://www.json.org/json-en.html)
-* GET: http://localhost:8082/renderLatex expects (String content, List<String> latexPackages, String output) must be [URLEncoded](http://www.eso.org/~ndelmott/url_encode.html)
+* POST: http://localhost:5030/renderLatex  expects (String content, List<String> latexPackages, String output) as [JSON](https://www.json.org/json-en.html)
+* GET: http://localhost:5030/renderLatex expects (String content, List<String> latexPackages, String output) must be [URLEncoded](http://www.eso.org/~ndelmott/url_encode.html)
 
 **Output formats** are:
 * svg (default): returns a SVG that contains the cutout of the rendered content.
@@ -51,14 +51,14 @@ Further varwidth guarantees a maximum document width of varwidth\textwidth, mean
 
 
 #### Examples:
-A minimal GET-Request example to render *pi* without defining any packages or an ouput format: ``http://localhost:8082/renderLatex?content=$%5Cpi$``
+A minimal GET-Request example to render *pi* without defining any packages or an ouput format: ``http://localhost:5030/renderLatex?content=$%5Cpi$``
 
 A POST-Request example that sets the output format to *pdf*, includes the two necessary packages *\usepackage{tikz} and \usetikzlibrary{quantikz}* and sets the content to render a small Quantum Circuit example:
 ```json
 {"content":"\\begin{quantikz} \\lstick{\\ket{0}} & \\phase{\\alpha} & \\gate{H} & \\phase{\\beta} & \\gate{H} & \\phase{\\gamma} & \\rstick{Arbitrary\\\\pure state}\\qw \\end{quantikz}","latexPackages":["\\usepackage{tikz}","\\usetikzlibrary{quantikz}"],"output":"pdf"}
 ```
 The same example as before just sent via a GET-Request:
-``http://localhost:8082/renderLatex?packages=%5Cusepackage%7Btikz%7D&packages=%5Cusetikzlibrary%7Bquantikz%7D&output=pdf&content=%5Cbegin%7Bquantikz%7D+%5Clstick%7B%5Cket%7B0%7D%7D+%26+%5Cphase%7B%5Calpha%7D+%26+%5Cgate%7BH%7D+%26+%5Cphase%7B%5Cbeta%7D+%26+%5Cgate%7BH%7D+%26+%5Cphase%7B%5Cgamma%7D+%26+%5Crstick%7BArbitrary%5C%5Cpure+state%7D%5Cqw+%5Cend%7Bquantikz%7D
+``http://localhost:5030/renderLatex?packages=%5Cusepackage%7Btikz%7D&packages=%5Cusetikzlibrary%7Bquantikz%7D&output=pdf&content=%5Cbegin%7Bquantikz%7D+%5Clstick%7B%5Cket%7B0%7D%7D+%26+%5Cphase%7B%5Calpha%7D+%26+%5Cgate%7BH%7D+%26+%5Cphase%7B%5Cbeta%7D+%26+%5Cgate%7BH%7D+%26+%5Cphase%7B%5Cgamma%7D+%26+%5Crstick%7BArbitrary%5C%5Cpure+state%7D%5Cqw+%5Cend%7Bquantikz%7D
 ``
 
 When rendering pictures and text in one request it is recommended to set varwidth and additionally add ``\usepackage{adjustbox}`` to the package list. 

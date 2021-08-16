@@ -70,6 +70,10 @@ Make sure to surround each graphic with a ``begin`` and ``end`` block of the adj
   \end{adjustbox}
   Text following the graphic
   ```
+A JSON example would look as follows:
+```json
+{"content":"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, \n\n\n\\begin{adjustbox}{max width=\textwidth}\n\\begin{quantikz}[row sep=0.1cm]& \\gate{X} & \\ctrl{1} & \\gate{X} & \\qw \\\\&  \\gate{X} & \\ctrl{1} & \\gate{X} & \\qw \\\\& \\gate{X} & \\ctrl{1} & \\gate{X} & \\qw \\\\& \\gate{X} & \\ctrl{1} & \\gate{X} & \\qw \\\\& \\gate{X} & \\ctrl{1} & \\gate{X} & \\qw \\\\& \\gate{X} & \\ctrl{1} & \\gate{X} & \\qw \\\\& \\gate{X} & \\ctrl{1} & \\gate{X} & \\qw \\\\& \\gate{X} & \\ctrl{1} & \\gate{X} & \\qw \\\\& \\gate{X} & \\ctrl{1} & \\gate{X} & \\qw \\\\& \\gate{X} & \\ctrl{1} & \\gate{X} & \\qw \\\\& \\gate{X} & \\ctrl{1} & \\gate{X} & \\qw \\\\& \\gate{X} & \\ctrl{1} & \\gate{X} & \\qw \\\\& \\qw & \\control{} & \\qw & \\qw \\\\& \\gate{X} & \\qw & \\qw & \\qw \\\\& \\gate{H} & \\qw & \\qw & \\qw\\end{quantikz}\n\\end{adjustbox}\n\n\n Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,  ","latexPackages":["\\usepackage{tikz}","\\usetikzlibrary{quantikz}","\\usepackage{adjustbox}"],"output":"svg", "varwidth":1.2 }
+```
 
 ### Notes:
 * LatexRenderer creates a new latex document with the following structure:
